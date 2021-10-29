@@ -3,11 +3,14 @@ package trove
 import (
 	"context"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	ID           int       `json:"id"`
-	Name         string    `json:"name"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"-"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -37,4 +40,21 @@ type UserService interface {
 	FindUsers(context.Context, UserFilter) ([]*User, error)
 	UpdateUser(context.Context, int, UserPatch) (*User, error)
 	DeleteUser(context.Context, int) error
+}
+
+func (u *User) SetPassword(password string) error {
+	pBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	u.PasswordHash = string(pBytes)
+
+	return nil
+}
+
+func (u *User) VerifyPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
+	return err == nil
 }
