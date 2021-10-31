@@ -19,7 +19,10 @@ type Server struct {
 	router *mux.Router
 
 	trove.UserService
+	trove.PortfolioService
 }
+
+type M map[string]interface{}
 
 const (
 	host     = "localhost"
@@ -56,9 +59,10 @@ func NewServer() *Server {
 	}
 
 	s := &Server{
-		server:      server,
-		router:      router,
-		UserService: postgres.NewUserService(db),
+		server:           server,
+		router:           router,
+		UserService:      postgres.NewUserService(db),
+		PortfolioService: postgres.NewPortfolioService(db),
 	}
 
 	s.routes()
@@ -72,8 +76,10 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) routes() {
-	s.router.HandleFunc("/users", s.registerUser)
+	s.router.HandleFunc("/users", s.registerUser).Methods("POST")
 	s.router.HandleFunc("/users/{id}", s.updateUser).Methods("PATCH", "PUT")
+	s.router.HandleFunc("/users/{id}/portfolio", s.getPortfolio).Methods("GET")
+	s.router.HandleFunc("/users/{id}/portfolio/value", s.getPortfolioValue).Methods("GET")
 }
 
 func (*Server) readJSON(r io.Reader, v interface{}) error {
