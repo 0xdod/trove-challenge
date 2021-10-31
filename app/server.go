@@ -44,8 +44,13 @@ func NewServer() *Server {
 	log.Println("connected to database successfully")
 
 	router := mux.NewRouter().StrictSlash(true)
+	n := negroni.New()
+	n.Use(negroni.NewLogger())
+	n.Use(negroni.NewRecovery())
+	n.UseHandler(router)
 	server := &http.Server{
 		Addr:         ":8000",
+		Handler:      n,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -56,11 +61,6 @@ func NewServer() *Server {
 		UserService: postgres.NewUserService(db),
 	}
 
-	n := negroni.New()
-	n.Use(negroni.NewLogger())
-	n.Use(negroni.NewRecovery())
-	n.UseHandler(router)
-	s.server.Handler = n
 	s.routes()
 
 	return s
@@ -72,7 +72,8 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) routes() {
-	s.router.HandleFunc("/users", s.RegisterUser)
+	s.router.HandleFunc("/users", s.registerUser)
+	s.router.HandleFunc("/users/{id}", s.updateUser).Methods("PATCH", "PUT")
 }
 
 func (*Server) readJSON(r io.Reader, v interface{}) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,8 +19,11 @@ type User struct {
 }
 
 type UserPatch struct {
-	Name  *string `json:"name"`
-	Email *string `json:"email"`
+	FirstName *string      `json:"first_name" mapstructure:"first_name,omitempty"`
+	LastName  *string      `json:"last_name" mapstructure:"last_name,omitempty"`
+	Email     *string      `json:"email" mapstructure:"email,omitempty" validate:"email"` // TODO remove and change to a secure flow
+	Password  *string      `json:"password" mapstructure:"password,omitempty"`            // TODO: remove and change to reset password flow
+	options   FilterOption `json:"-"`
 }
 
 type FilterOption struct {
@@ -57,4 +61,31 @@ func (u *User) SetPassword(password string) error {
 func (u *User) VerifyPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
 	return err == nil
+}
+
+func (u *User) ApplyPatch(p UserPatch) {
+
+	if p.FirstName != nil {
+		u.FirstName = *p.FirstName
+	}
+
+	if p.LastName != nil {
+		u.LastName = *p.LastName
+	}
+
+	if p.Email != nil {
+		u.Email = *p.Email
+	}
+
+	if p.Password != nil {
+		u.SetPassword(*p.Password)
+	}
+}
+
+func (p UserPatch) ToMap() map[string]interface{} {
+	out := make(map[string]interface{})
+	if err := mapstructure.Decode(p, &out); err != nil {
+		return nil
+	}
+	return out
 }

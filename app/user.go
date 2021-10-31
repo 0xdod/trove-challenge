@@ -3,9 +3,11 @@ package app
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/0xdod/trove"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 )
 
 var validate = validator.New()
@@ -31,7 +33,7 @@ func (usr *userSignupRequest) ValidatedUser() (*trove.User, error) {
 	return &user, nil
 }
 
-func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
+func (s *Server) registerUser(w http.ResponseWriter, r *http.Request) {
 
 	userDetails := &userSignupRequest{}
 
@@ -69,7 +71,36 @@ func (s *Server) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handleSignup() http.Handler {
+func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	idStr := mux.Vars(r)["id"]
+	id, _ := strconv.Atoi(idStr)
+	patch := trove.UserPatch{}
+
+	if err := s.readJSON(r.Body, &patch); err != nil {
+		s.writeJSON(w, http.StatusUnprocessableEntity, RM{"error", "request error: " + err.Error(), nil})
+		return
+	}
+
+	user, err := s.UserService.UpdateUser(r.Context(), id, patch)
+
+	if err != nil {
+		s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error, update failed", nil})
+		return
+	}
+
+	if err := s.writeJSON(w, http.StatusOK, RM{"success", "update successful", user}); err != nil {
+		s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
+		log.Printf("json error %v", err)
+		return
+	}
+}
+
+func (s *Server) addPortfolioPosition(w http.ResponseWriter, r *http.Request) {
+	// userID, _ := strconv.Atoi(mux.Vars(r)["id"])
+
+}
+
+func (s *Server) coolHandler2() http.Handler {
 	type request struct{}
 
 	type response struct{}
@@ -77,6 +108,10 @@ func (s *Server) handleSignup() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	})
+}
+
+func (s *Server) dummyHandlerFunc(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (s *Server) coolHandler() http.Handler {
