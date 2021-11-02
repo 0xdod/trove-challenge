@@ -26,8 +26,16 @@ func (g *gormUser) Create(ctx context.Context, u *trove.User) error {
 	return nil
 }
 
-func (g *gormUser) FindUserByID(_ context.Context, _ int) (*trove.User, error) {
-	panic("not implemented") // TODO: Implement
+func (g *gormUser) FindUserByID(ctx context.Context, id int) (*trove.User, error) {
+	user := &trove.User{}
+	db := g.db.WithContext(ctx)
+	err := db.Model(user).Where("id = ?", id).First(user).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (g *gormUser) FindUsers(_ context.Context, _ trove.UserFilter) ([]*trove.User, error) {
