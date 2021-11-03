@@ -1,8 +1,12 @@
 package app
 
 import (
-	"math"
+	"context"
+	"errors"
+	"fmt"
 	"net/http"
+
+	"github.com/0xdod/trove"
 )
 
 func (s *Server) processLoan() http.HandlerFunc {
@@ -36,14 +40,21 @@ func (s *Server) processLoan() http.HandlerFunc {
 			return
 		}
 
-		pValue, err := s.PortfolioService.GetPortfolioValue(r.Context(), user.ID)
+		newLoan := &trove.Loan{
+			Amount:       loanReq.Amount,
+			Duration:     loanReq.Duration,
+			UserID:       user.ID,
+			InterestRate: 15,
+		}
+
+		isEligible, err := s.UserIsEligibileForLoan(user, newLoan)
 
 		if err != nil {
-			s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
+			s.serverErrorResponse(w, err)
 			return
 		}
 
-		if !isEligibileForLoan(pValue, loanReq.Amount) {
+		if !isEligible {
 			s.writeJSON(w, http.StatusOK, RM{
 				Status:  "fail",
 				Message: "loan request declined, you are not eligible for this amount.",
@@ -51,38 +62,65 @@ func (s *Server) processLoan() http.HandlerFunc {
 			return
 		}
 
-		proratedPayment := calcProratedPayment(loanReq.Amount, loanReq.Duration)
+		if err := s.LoanService.CreateLoan(r.Context(), newLoan); err != nil {
+			s.serverErrorResponse(w, err)
+			return
+		}
 
-		s.writeJSON(w, http.StatusOK, RM{
+		_ = s.writeJSON(w, http.StatusOK, RM{
 			Status:  "success",
 			Message: "loan request approved",
 			Data: M{
-				"amount":                     loanReq.Amount,
-				"repayment_period_in_months": loanReq.Duration,
-				"total_repayment":            proratedPayment * float64(loanReq.Duration),
-				"monthly_repayment":          proratedPayment,
+				"amount":             loanReq.Amount,
+				"repayment_duration": fmt.Sprintf("%d months", loanReq.Duration),
+				"next_repayment":     newLoan.PaymentDue().Format("Mon Jan 2 15:04:05 2006"),
+				"monthly_repayment":  newLoan.ProratedPayment(),
 			},
 		})
 	})
 }
 
-func isEligibileForLoan(portfolioValue, loanAmount float64) bool {
-	maximumLoan := (60.00 / 100.00) * portfolioValue
-	return loanAmount < maximumLoan
+func (s *Server) listLoans(w http.ResponseWriter, r *http.Request) {
+	user := UserFromContext(r.Context())
+
+	if user == nil {
+		s.serverErrorResponse(w, errors.New("user not authenticated"))
+		return
+	}
+
+	loans, err := s.LoanService.GetLoansByUser(r.Context(), user.ID)
+
+	if err != nil {
+		s.serverErrorResponse(w, err)
+		return
+	}
+
+	s.writeJSON(w, http.StatusOK, RM{"success", "loans retrieved", loans})
 }
 
-func calculateRepayment(amount, rate float64, duration int) float64 {
-	// 1 year == 12 months
-	// x years == duration months
-	durationInYears := float64(duration) / 12
-	rateInPercent := rate / 100
-	// compound interest compounding once per month
-	return amount * math.Pow(1+(rateInPercent/12), 12*durationInYears)
-}
+func (s *Server) UserIsEligibileForLoan(user *trove.User, loan *trove.Loan) (bool, error) {
+	// check previous loans
+	ctx := context.Background()
+	loans, err := s.LoanService.GetLoansByUser(ctx, user.ID)
 
-func calcProratedPayment(amount float64, period int) float64 {
-	interestRate := 15
-	totalRepayment := calculateRepayment(amount, float64(interestRate), period)
+	if err != nil {
+		return false, err
+	}
 
-	return totalRepayment / float64(period)
+	val, err := s.PortfolioService.GetPortfolioValue(ctx, user.ID)
+
+	if err != nil {
+		return false, err
+	}
+
+	totalLoanBal := 0.00
+
+	for _, loan := range loans {
+		totalLoanBal += loan.Balance()
+	}
+
+	loanLimit := (60.0 / 100.0) * val
+
+	// total loan balance up to 60% of portfolio value?
+	return loanLimit > totalLoanBal, nil
 }

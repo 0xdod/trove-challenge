@@ -18,12 +18,13 @@ func (g *gormLoanService) CreateLoan(ctx context.Context, loan *trove.Loan) erro
 func (g *gormLoanService) GetLoansByUser(ctx context.Context, userID int) ([]*trove.Loan, error) {
 	db := g.db.WithContext(ctx)
 	loans := []*trove.Loan{}
-	if err := db.Model(&trove.Loan{}).Where("user_id = ?", userID).Find(loans).Error; err != nil {
+	if err := db.Model(&trove.Loan{}).Where("user_id = ?", userID).Find(&loans).Error; err != nil {
 		return nil, err
 	}
 	return loans, nil
 }
 
 func NewLoanService(db *DB) trove.LoanService {
+	db.db.AutoMigrate(&trove.Loan{})
 	return &gormLoanService{db}
 }

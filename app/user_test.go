@@ -2,7 +2,6 @@ package app
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -11,43 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0xdod/mock"
 	"github.com/0xdod/trove"
 	"github.com/gorilla/mux"
 )
-
-type MockUserService struct {
-	Users        []*trove.User
-	CreateUserFn func(*trove.User) error
-	UpdateUserFn func(int, trove.UserPatch) (*trove.User, error)
-}
-
-func (m *MockUserService) Create(_ context.Context, u *trove.User) error {
-	return m.CreateUserFn(u)
-}
-
-func (m *MockUserService) FindUserByID(_ context.Context, _ int) (*trove.User, error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (m *MockUserService) FindUserByToken(_ context.Context, _ string) (*trove.User, error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (m *MockUserService) FindUserByEmail(_ context.Context, _ string) (*trove.User, error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (m *MockUserService) FindUsers(_ context.Context, _ trove.UserFilter) ([]*trove.User, error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (m *MockUserService) UpdateUser(_ context.Context, id int, up trove.UserPatch) (*trove.User, error) {
-	return m.UpdateUserFn(id, up)
-}
-
-func (m *MockUserService) DeleteUser(_ context.Context, _ int) error {
-	panic("not implemented") // TODO: Implement
-}
 
 func Test_registerUser(t *testing.T) {
 	t.Run("test successful user creation", func(t *testing.T) {
@@ -63,7 +29,7 @@ func Test_registerUser(t *testing.T) {
 		sr := strings.NewReader(userJsonReq)
 		req, _ := http.NewRequest(http.MethodPost, "/users", sr)
 		w := httptest.NewRecorder()
-		mus := &MockUserService{}
+		mus := &mock.UserService{}
 
 		mus.CreateUserFn = func(u *trove.User) error {
 			u.ID = 1
@@ -116,7 +82,7 @@ func Test_updateUser(t *testing.T) {
 		sr := strings.NewReader(userJsonReq)
 		req, _ := http.NewRequest(http.MethodPatch, "/users/1", sr)
 		w := httptest.NewRecorder()
-		mus := &MockUserService{
+		mus := &mock.UserService{
 			Users: []*trove.User{
 				{
 					ID:        1,

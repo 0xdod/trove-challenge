@@ -21,6 +21,7 @@ type Server struct {
 	trove.UserService
 	trove.PortfolioService
 	trove.AuthService
+	trove.LoanService
 }
 
 type M map[string]interface{}
@@ -65,6 +66,7 @@ func NewServer() *Server {
 		UserService:      postgres.NewUserService(db),
 		PortfolioService: postgres.NewPortfolioService(db),
 		AuthService:      postgres.NewAuthService(db),
+		LoanService:      postgres.NewLoanService(db),
 	}
 
 	s.routes()

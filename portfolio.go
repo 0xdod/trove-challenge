@@ -4,8 +4,8 @@ import "context"
 
 type PortfolioPosition struct {
 	ID            int     `json:"id,omitempty"`
-	UserID        int     `json:"user_id,omitempty"`
-	User          *User   `json:"user,omitempty"`
+	UserID        int     `json:"-"`
+	User          *User   `json:"-"`
 	Symbol        string  `json:"symbol,omitempty"`
 	TotalQuantity float64 `json:"total_quantity,omitempty"`
 	EquityValue   float64 `json:"equity_value,omitempty"`
