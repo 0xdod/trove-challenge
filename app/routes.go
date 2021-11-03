@@ -5,5 +5,5 @@ func (s *Server) routes() {
 	s.router.HandleFunc("/users/{id}", s.updateUser).Methods("PATCH", "PUT")
 	s.router.HandleFunc("/users/{id}/portfolio", s.getPortfolio).Methods("GET")
 	s.router.HandleFunc("/users/{id}/portfolio/value", s.getPortfolioValue).Methods("GET")
-	s.router.HandleFunc("/loan", s.processLoan).Methods("POST")
+	s.router.Handle("/loan", s.processLoan()).Methods("POST")
 }
