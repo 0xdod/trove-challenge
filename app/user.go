@@ -79,9 +79,7 @@ func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.writeJSON(w, http.StatusOK, RM{"success", "update successful", user}); err != nil {
-		s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
 		log.Printf("json error %v", err)
-		return
 	}
 }
 
@@ -96,9 +94,7 @@ func (s *Server) getPortfolio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.writeJSON(w, http.StatusOK, RM{"success", "portfolio positions retrieved", portfolio}); err != nil {
-		s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
 		log.Printf("json error %v", err)
-		return
 	}
 }
 
@@ -115,8 +111,6 @@ func (s *Server) getPortfolioValue(w http.ResponseWriter, r *http.Request) {
 	err = s.writeJSON(w, http.StatusOK, RM{"success", "portfolio value retrieved", M{"portfolio_value": value}})
 
 	if err != nil {
-		s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
 		log.Printf("json error %v", err)
-		return
 	}
 }

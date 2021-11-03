@@ -19,11 +19,10 @@ type User struct {
 }
 
 type UserPatch struct {
-	FirstName *string      `json:"first_name" mapstructure:"first_name,omitempty"`
-	LastName  *string      `json:"last_name" mapstructure:"last_name,omitempty"`
-	Email     *string      `json:"email" mapstructure:"email,omitempty" validate:"email"` // TODO remove and change to a secure flow
-	Password  *string      `json:"password" mapstructure:"password,omitempty"`            // TODO: remove and change to reset password flow
-	options   FilterOption `json:"-"`
+	FirstName *string `json:"first_name" mapstructure:"first_name,omitempty"`
+	LastName  *string `json:"last_name" mapstructure:"last_name,omitempty"`
+	Email     *string `json:"email" mapstructure:"email,omitempty" validate:"email"` // TODO remove and change to a secure flow
+	Password  *string `json:"password" mapstructure:"password,omitempty"`            // TODO: remove and change to reset password flow
 }
 
 type FilterOption struct {
@@ -41,6 +40,8 @@ type UserFilter struct {
 type UserService interface {
 	Create(context.Context, *User) error
 	FindUserByID(context.Context, int) (*User, error)
+	FindUserByEmail(context.Context, string) (*User, error)
+	FindUserByToken(context.Context, string) (*User, error)
 	FindUsers(context.Context, UserFilter) ([]*User, error)
 	UpdateUser(context.Context, int, UserPatch) (*User, error)
 	DeleteUser(context.Context, int) error

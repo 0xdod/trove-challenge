@@ -23,3 +23,7 @@ func (g *gormLoanService) GetLoansByUser(ctx context.Context, userID int) ([]*tr
 	}
 	return loans, nil
 }
+
+func NewLoanService(db *DB) trove.LoanService {
+	return &gormLoanService{db}
+}

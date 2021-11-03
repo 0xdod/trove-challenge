@@ -29,6 +29,14 @@ func (m *MockUserService) FindUserByID(_ context.Context, _ int) (*trove.User, e
 	panic("not implemented") // TODO: Implement
 }
 
+func (m *MockUserService) FindUserByToken(_ context.Context, _ string) (*trove.User, error) {
+	panic("not implemented") // TODO: Implement
+}
+
+func (m *MockUserService) FindUserByEmail(_ context.Context, _ string) (*trove.User, error) {
+	panic("not implemented") // TODO: Implement
+}
+
 func (m *MockUserService) FindUsers(_ context.Context, _ trove.UserFilter) ([]*trove.User, error) {
 	panic("not implemented") // TODO: Implement
 }

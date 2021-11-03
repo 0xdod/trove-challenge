@@ -29,9 +29,9 @@ func (s *Server) processLoan() http.HandlerFunc {
 			return
 		}
 
-		user, err := s.UserService.FindUserByID(r.Context(), 1)
+		user := UserFromContext(r.Context())
 
-		if err != nil {
+		if user == nil {
 			s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error", nil})
 			return
 		}

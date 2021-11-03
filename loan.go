@@ -18,5 +18,5 @@ type Loan struct {
 
 type LoanService interface {
 	CreateLoan(context.Context, *Loan) error
-	GetLoansByUser(context.Context, int) (*Loan, error)
+	GetLoansByUser(context.Context, int) ([]*Loan, error)
 }
