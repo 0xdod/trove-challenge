@@ -27,6 +27,23 @@ months, period should be decided by Ope - 10 points
 8. Payback his loan through any payment providers, please note using payment provider
 test bed is perfectly acceptable provided it works end to end - 20 points
 
-# Technical requirements
+## Technical requirements
 - Go 1.17
 - PostgreSQL 13
+
+## API Documentation and Testing
+The endpoints exposed by the API are:
+- POST /api/v1/users - Register a new user
+- PUT /api/v1/users/{id} - update user info
+- GET /api/v1/portfolio - get portfolio positions
+- GET /api/v1/portfolio/value - get portfolio's total value
+- POST /api/v1/loans - apply for a loan
+- GET /api/v1/loans  - view loans
+- POST /api/v1/auth/token - api authorization
+
+There is a thunder-collection that can be imported with the thunder client in vscode to test the api.
+
+## Running locally
+- Clone the repo
+- get all dependencies
+- run `make run` to start the server

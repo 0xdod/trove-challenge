@@ -76,7 +76,7 @@
             ],
             "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
             "name": "Pull portfolio",
-            "url": "localhost:8000/users/1/portfolio",
+            "url": "localhost:8000/api/v1/portfolio",
             "method": "GET",
             "modified": "2021-11-03T20:24:24.328Z",
             "created": "2021-10-31T12:20:17.993Z",
