@@ -14,8 +14,8 @@ const (
 )
 
 type Token struct {
-	PlainText string    `json:"token,omitempty"`
-	Hash      []byte    `json:"-"`
+	PlainText string    `json:"token,omitempty" gorm:"unique"`
+	Hash      []byte    `json:"-" gorm:"unique"`
 	UserID    int       `json:"-"`
 	User      User      `json:"-"`
 	Expiry    time.Time `json:"expiry,omitempty"`
@@ -32,7 +32,7 @@ func generateToken(userID int, ttl time.Duration, scope string) (*Token, error) 
 		Expiry: time.Now().Add(ttl),
 		Scope:  scope,
 	}
-
+	rand.Seed(time.Now().Unix())
 	randBytes := make([]byte, 16)
 
 	_, err := rand.Read(randBytes)

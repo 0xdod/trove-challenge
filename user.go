@@ -90,3 +90,7 @@ func (p UserPatch) ToMap() map[string]interface{} {
 	}
 	return out
 }
+
+func (u *User) IsAnonymous() bool {
+	return *u == User{}
+}

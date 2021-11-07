@@ -2,40 +2,56 @@
 
 {{ define "styles" }}
 <style>
-    .portfolio ul, .loan ul {
-        overflow-y: auto;
-        height: 250px;
+    .portfolio ul, .loans ul {
         max-width: 70%;
         list-style-type: none;
     }
-    .portfolio ul li, .loan ul li {
+    .portfolio ul li, .loans ul li {
      padding: 10px 5px;
      background-color: darkslateblue;
      /* border-bottom: 1px soild darkslateblue;
      box-shadow: 0 2px 3px rgba(0, 0 ,0 ,0.8);    */
     }
+
+    table {
+        border: 1px solid silver;
+        padding: 10px;
+    }
+
+    th {
+        border: 1px solid silver;
+    }
+    td, th {
+        padding: 5px 15px;
+        border-right: 1px solid silver;  
+    }
 </style>
 {{ end }}
 
 {{ define "content" }}
-<div>
-    <ul class="nav">
-        <li><a href="/">Home</a></li> / &nbsp;
-        <li><a href="/login">Log in</a></li> / &nbsp;
-        <li><a href="/signup">Sign up</a></li>
-    </ul>
-</div>
-
 <h1> Drove </h1>
 
-<div class="portfolio">
+<div class="portfolio mb-4">
     <h3>Portfolio positions </h3>
-    <ul id="portfolio-list"></ul>
+    <table id="portfolio">
+        <tr>
+            <th>Symbol</th>
+            <th>Total Quantity</th>
+            <th>Equity Value ($)</th>
+            <th>Price Per Share ($)</th>
+        </tr>
+    </table>
 </div>
 
-<div class="loan">
+<div class="loans mb-4">
     <h3>Loans</h3>
-    <ul id="loan-list"></ul>
+    <table id="loans">
+        <tr>
+            <th>Amount</th>
+            <th>Duration</th>
+            <th>Outstanding</th>
+        </tr>
+    </table>
 </div>
 {{ end }}
 
@@ -57,17 +73,17 @@
                 console.log(message)
                 return
             }
-           const portfolioUL = document.querySelector('#portfolio-list')
+           const portfolioTbl = document.querySelector('#portfolio')
            data.forEach(el => {
-                const li = document.createElement('li')
+                const tr = document.createElement('tr')
                 const {symbol, total_quantity, equity_value, price_per_share} =  el
-                li.innerHTML = `
-                    <p><strong>Symbol</strong>: ${symbol}<p>
-                    <p><strong>Total Quantity</strong>: ${total_quantity}<p>
-                    <p><strong>Equity Value</strong>: ${equity_value} <p>
-                    <p><strong>Price Per Share</strong>: ${ price_per_share } <p>
+                tr.innerHTML = `
+                    <td>${symbol}</td>
+                    <td>${total_quantity}</td>
+                    <td>${equity_value}</td>
+                    <td>${ price_per_share }</td>
                 `
-                portfolioUL.appendChild(li)
+                portfolioTbl.appendChild(tr)
            })
 
         fetch('/api/v1/loans', options).
@@ -78,16 +94,16 @@
                     console.log(message)
                     return
                 }
-            const loansUL = document.querySelector('#loan-list')
+            const loansTbl = document.querySelector('#loans')
             data.forEach(el => {
-                    const li = document.createElement('li')
+                    const tr = document.createElement('tr')
                     const { amount, duration, paid_back } = el
-                    li.innerHTML = `
-                        <p><strong>Loan Amount</strong>: ${amount}<p>
-                        <p><strong>Loan Duration</strong>: ${duration} months <p>
-                        <p><strong>Outstanding</strong>: ${amount - paid_back} <p>
+                    tr.innerHTML = `
+                        <td>${amount}</td>
+                        <td>${duration} months</td>
+                        <td>${amount - paid_back}</td>
                     `
-                    loansUL.appendChild(li)
+                    loansTbl.appendChild(tr)
             })
         })
     })

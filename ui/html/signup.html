@@ -2,17 +2,30 @@
 
 {{ define "content" }}
 <form id="form">
-    <div>
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input class="form-control" type="text" id="first_name" name="first_name">
+    </div>
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input class="form-control" type="text" id="last_name" name="last_name">
+    </div>
+    <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" name="email">
+        <input class="form-control" type="email" id="email" name="email">
     </div>
 
-    <div>
+    <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password">
+        <input class="form-control" type="password" id="password" name="password">
     </div>
+    <div class="form-group">
+        <label for="password2">Retype Password</label>
+        <input class="form-control" type="password" id="password2" name="password2">
+    </div>
+    <p id="p-error"></p>
 
-    <button>Sign up</button>
+    <button class="btn btn-success" id="submit-btn">Sign up</button>
 </form>
 {{ end }}
 
@@ -22,13 +35,17 @@
     const form = document.querySelector("#form")
     form.addEventListener('submit', ($evt) => {
         $evt.preventDefault()
-        var email = document.getElementsByName('email').item(0).value
-        var password = document.getElementsByName('password').item(0).value
+        const first_name = document.getElementsByName('first_name').item(0).value
+        const last_name = document.getElementsByName('last_name').item(0).value
+        const email = document.getElementsByName('email').item(0).value
+        const password = document.getElementsByName('password').item(0).value
         const options = {
             method: 'POST',
             body: JSON.stringify({
                 email,
-                password
+                password,
+                first_name,
+                last_name,
             }),
             headers: {},
         }
@@ -36,15 +53,25 @@
            then(resp => resp.json()).
            then(({data, message, status}) => {
                if (status !== 'success') {
-                   alert('an error occurred')
+                   alert('an error occurred' + message)
                    return
                }
-               const {token, expiry} = data.token 
-               localStorage.setItem('token', token)
-               location.href = '/'
+               location.href = '/login'
            }).
            catch(console.log)
     })
-    
+    const password = document.querySelector('[name="password"]')
+    const password2 = document.querySelector('[name="password2"]')
+    const pError = document.querySelector('#p-error')
+    const submit = document.querySelector('#submit-btn')
+    password2.addEventListener('input', ($evt) => {
+       if ($evt.target.value !== password.value) {
+            pError.innerHTML = '<small class="text-danger">Passwords do not match!!</small>'
+            submit.setAttribute("disabled", "disabled")
+       }else {
+           pError.innerHTML = ''
+           submit.removeAttribute("disabled")
+       }
+    })
 </script>
 {{ end }}

@@ -1,9 +1,13 @@
 package app
 
+import "net/http"
+
 func (s *Server) routes() {
 	s.router.Handle("/", s.handleIndex())
 	s.router.Handle("/login", s.handleLogin())
 	s.router.Handle("/signup", s.handleSignup())
+
+	s.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/assets"))))
 
 	apiRouter := s.router.PathPrefix("/api/v1").Subrouter()
 	{

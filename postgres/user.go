@@ -58,7 +58,7 @@ func (g *gormUser) FindUserByToken(ctx context.Context, tokenStr string) (*trove
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(*token)
 	return g.FindUserByID(ctx, token.UserID)
 }
 
