@@ -7,9 +7,10 @@ import (
 )
 
 type UserService struct {
-	Users        []*trove.User
-	CreateUserFn func(*trove.User) error
-	UpdateUserFn func(int, trove.UserPatch) (*trove.User, error)
+	Users             []*trove.User
+	CreateUserFn      func(*trove.User) error
+	UpdateUserFn      func(int, trove.UserPatch) (*trove.User, error)
+	FindUserByTokenFn func() *trove.User
 }
 
 func (m UserService) Create(_ context.Context, u *trove.User) error {
@@ -21,7 +22,7 @@ func (m UserService) FindUserByID(_ context.Context, _ int) (*trove.User, error)
 }
 
 func (m UserService) FindUserByToken(_ context.Context, _ string) (*trove.User, error) {
-	panic("not implemented") // TODO: Implement
+	return m.FindUserByTokenFn(), nil
 }
 
 func (m UserService) FindUserByEmail(_ context.Context, _ string) (*trove.User, error) {

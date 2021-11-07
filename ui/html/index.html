@@ -8,9 +8,8 @@
     }
     .portfolio ul li, .loans ul li {
      padding: 10px 5px;
-     background-color: darkslateblue;
-     /* border-bottom: 1px soild darkslateblue;
-     box-shadow: 0 2px 3px rgba(0, 0 ,0 ,0.8);    */
+     border-bottom: 1px soild darkslateblue;
+     box-shadow: 0 2px 3px rgba(0, 0 ,0 ,0.8);
     }
 
     table {
@@ -44,18 +43,52 @@
 </div>
 
 <div class="loans mb-4">
-    <h3>Loans</h3>
-    <table id="loans">
-        <tr>
-            <th>Amount</th>
-            <th>Duration</th>
-            <th>Outstanding</th>
-        </tr>
-    </table>
+    <h3 class="mb-2">Loans</h3>
+    <div class="mb-4">
+        <h6>Apply for fresh loans.</h6>
+        <form id="loan-form" class="w-50">
+            <div class="form-group mb-2">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" class="form-control" name="amount">
+            </div>
+            <div class="form-group mb-2">
+                <label for="duration">Duration</label>
+                <select name="duration" id="duration" class="form-control">
+                    <Option value="">---</Option>
+                    <Option value="6">6 months</Option>
+                    <Option value="7">7 months</Option>
+                    <Option value="8">8 months</Option>
+                    <Option value="9">9 months</Option>
+                    <Option value="10">10 months</Option>
+                    <Option value="11">11 months</Option>
+                    <Option value="12">12 months</Option>
+                </select>
+            </div>
+            <button class="btn btn-success">Apply for new loan</button>
+        </form>
+    </div>
+    <div id="loans-container">
+        <table id="loans">
+            <tr>
+                <th>Amount ($)</th>
+                <th>Duration</th>
+                <th>Next Installment ($)</th>
+                <th>Due Date</th>
+                <th>Outstanding ($)</th>
+            </tr>
+        </table>
+    </div>
 </div>
 {{ end }}
 
 {{ define "scripts" }}
+<script>
+    $.ajaxSetup({
+       beforeSend: function(request) {
+           request.setRequestHeader('Authorization', `Bearer ${TOKEN}`)
+       },
+   })
+</script>
 <script>
     const token = localStorage.getItem('token')
     const options = {
@@ -95,16 +128,49 @@
                     return
                 }
             const loansTbl = document.querySelector('#loans')
+            
+            if (data.length < 1) {
+                const $el = $('#loans-container')
+                const $p = $('<p>')
+                $p.text("You don't have any outstanding loans.")
+                $el.append($p)
+                return
+            }
+
             data.forEach(el => {
                     const tr = document.createElement('tr')
-                    const { amount, duration, paid_back } = el
+                    const { amount, duration, due_date, next_payment_amount, paid_back } = el
                     tr.innerHTML = `
                         <td>${amount}</td>
                         <td>${duration} months</td>
+                        <td>${next_payment_amount}</td>
+                        <td>${new Date(due_date)}</td>
                         <td>${amount - paid_back}</td>
                     `
                     loansTbl.appendChild(tr)
             })
+        })
+
+        $('#loan-form').on('submit', ($evt) => {
+            $evt.preventDefault()
+            const $this = $($evt.target)
+            console.log($this.serialize())
+            $.post('/api/v1/loans', JSON.stringify({
+                amount: parseFloat($('[name="amount"]').val()),
+                duration: parseInt($('[name="duration"]').val()),
+            })).done(({data, status})=> {
+                console.log(data)
+                const { amount, duration, due_date, next_payment_amount, paid_back } = data
+                const $tr = $(`<tr>
+                        <td>${amount}</td>
+                        <td>${duration} months</td>
+                        <td>${next_payment_amount}</td>
+                        <td>${new Date(due_date)}</td>
+                        <td>${amount - paid_back}</td>
+                    </tr>`)
+                    $(('#loans')).append($tr)
+                console.log(data)
+            }).fail(console.log)
         })
     })
 </script>

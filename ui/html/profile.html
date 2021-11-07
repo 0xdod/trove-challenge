@@ -1,0 +1,118 @@
+{{ define "title" }} Edit Profile {{ end }}
+
+{{ define "content" }}
+
+<form id="form1">
+    <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input class="form-control" type="text" id="first_name" name="first_name" value="{{ .user.FirstName }}">
+    </div>
+    <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input class="form-control" type="text" id="last_name" name="last_name" value="{{ .user.LastName }}">
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input class="form-control" type="email" id="email" name="email" value="{{ .user.Email }}">
+    </div>
+    <button class="btn btn-success" id="submit-btn">Save changes</button>
+</form>
+
+<h3>Change Password</h3>
+<form id="form2">
+    <div class="form-group">
+        <label for="old-password">Old Password</label>
+        <input class="form-control" type="password" id="old-password" name="old-password">
+    </div>
+
+    <div class="form-group">
+        <label for="new-password">New Password</label>
+        <input class="form-control" type="password" id="new-password" name="new-password">
+    </div>
+    <div class="form-group">
+        <label for="new-password2">Confirm Password</label>
+        <input class="form-control" type="password" id="new-password2" name="new-password2">
+    </div>
+    <p id="p-error"></p>
+    <button class="btn btn-success" id="change-password-btn">Change password</button>
+</form>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    const form1 = document.querySelector("#form1")
+    form1.addEventListener('submit', ($evt) => {
+        $evt.preventDefault()
+        const first_name = document.getElementsByName('first_name').item(0).value
+        const last_name = document.getElementsByName('last_name').item(0).value
+        const email = document.getElementsByName('email').item(0).value
+        const options = {
+            method: 'PATCH',
+            body: JSON.stringify({
+                email,
+                first_name,
+                last_name,
+            }),
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`
+            },
+        }
+        fetch('/api/v1/users/{{ .user.ID}}', options).
+           then(resp => resp.json()).
+           then(({data, message, status}) => {
+               if (status !== 'success') {
+                   alert('an error occurred' + message)
+                   return
+               }
+               location.href = '/'
+           }).
+           catch(console.log)
+    })
+
+    const oldPassword = document.getElementsByName('old-password').item(0)
+    const newPassword = document.querySelector('[name="new-password"]')
+    
+    const form2 = document.querySelector("#form2")
+    form2.addEventListener('submit', ($evt) => {
+        $evt.preventDefault()
+       const old_password = oldPassword.value
+       const new_password = newPassword.value
+
+        const options = {
+            method: 'PATCH',
+            body: JSON.stringify({
+               old_password,
+               new_password
+            }),
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${TOKEN}`
+            },
+        }
+        fetch('/api/v1/users/{{ .user.ID}}', options).
+           then(resp => resp.json()).
+           then(({data, message, status}) => {
+               if (status !== 'success') {
+                   alert('an error occurred' + message)
+                   return
+               }
+               location.href = '/'
+           }).
+           catch(console.log)
+    })
+    const pError = document.querySelector('#p-error')
+    const submit = document.querySelector('#change-password-btn')
+    const newPassword2 = document.querySelector('[name="new-password2"]')
+    newPassword2.addEventListener('input', ($evt) => {
+        console.log(newPassword.value, newPassword2.value)
+       if ($evt.target.value !== newPassword.value) {
+            pError.innerHTML = '<small class="text-danger">Passwords do not match!!</small>'
+            submit.setAttribute("disabled", "disabled")
+       }else {
+           pError.innerHTML = ''
+           submit.removeAttribute("disabled")
+       }
+    })
+</script>
+{{ end }}

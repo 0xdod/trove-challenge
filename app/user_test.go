@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/0xdod/mock"
 	"github.com/0xdod/trove"
+	"github.com/0xdod/trove/mock"
 	"github.com/gorilla/mux"
 )
 
@@ -27,7 +27,7 @@ func Test_registerUser(t *testing.T) {
 }
 	`
 		sr := strings.NewReader(userJsonReq)
-		req, _ := http.NewRequest(http.MethodPost, "/users", sr)
+		req, _ := http.NewRequest(http.MethodPost, "/api/v1/users", sr)
 		w := httptest.NewRecorder()
 		mus := &mock.UserService{}
 
@@ -80,7 +80,8 @@ func Test_updateUser(t *testing.T) {
 }
 `
 		sr := strings.NewReader(userJsonReq)
-		req, _ := http.NewRequest(http.MethodPatch, "/users/1", sr)
+		req, _ := http.NewRequest(http.MethodPatch, "/api/v1/users/1", sr)
+		req.Header.Add("Authorization", "Bearer HelloWorld")
 		w := httptest.NewRecorder()
 		mus := &mock.UserService{
 			Users: []*trove.User{
@@ -104,6 +105,10 @@ func Test_updateUser(t *testing.T) {
 			}
 			user.ApplyPatch(p)
 			return user, nil
+		}
+
+		mus.FindUserByTokenFn = func() *trove.User {
+			return mus.Users[0]
 		}
 
 		expectedResp := trove.User{
@@ -149,13 +154,13 @@ func assertDeepEqual(tb testing.TB, got, want interface{}) {
 
 }
 
-func assertStringsEqual(tb testing.TB, got, want string) {
-	tb.Helper()
+// func assertStringsEqual(tb testing.TB, got, want string) {
+// 	tb.Helper()
 
-	if got != want {
-		tb.Errorf("expected %q, got %q", want, got)
-	}
-}
+// 	if got != want {
+// 		tb.Errorf("expected %q, got %q", want, got)
+// 	}
+// }
 
 func extractDataFromResponse(body io.Reader, v interface{}) error {
 	grm := genericResponseModel{}

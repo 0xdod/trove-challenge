@@ -1,7 +1,15 @@
-<div class="mb-5">
+<div class="mb-3">
     <ul class="nav">
         <li><a href="/">Home</a></li>&nbsp; / &nbsp;
+        {{ if .user.IsAnonymous }}
         <li><a href="/login">Log in</a></li>&nbsp; / &nbsp;
         <li><a href="/signup">Sign up</a></li>
+        {{ else }}
+        <li><a href="/profile">Profile</a></li>&nbsp;
+        <li style="margin-left: auto;"><form action="/logout" method="POST"> <button class="btn btn-danger">Log out</button></form></li>
+        {{ end }}
     </ul>
+    {{ if not (.user.IsAnonymous) }}
+    <div>Hello, {{ .user.FirstName }}</div>
+    {{ end }}
 </div>

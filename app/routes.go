@@ -1,11 +1,19 @@
 package app
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func (s *Server) routes() {
-	s.router.Handle("/", s.handleIndex())
-	s.router.Handle("/login", s.handleLogin())
-	s.router.Handle("/signup", s.handleSignup())
+	htmlRouter := s.router.PathPrefix("/").Subrouter()
+	htmlRouter.Use(s.SessionAuth)
+	htmlRouter.Use(s.AddDefaultContext)
+	{
+		htmlRouter.Handle("/", s.loginRequired(s.handleIndex()))
+		htmlRouter.Handle("/login", s.handleLogin())
+		htmlRouter.Handle("/signup", s.handleSignup())
+		htmlRouter.Handle("/profile", s.loginRequired(s.handleProfileUpdate()))
+	}
 
 	s.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/assets"))))
 

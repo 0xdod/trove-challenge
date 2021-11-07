@@ -28,6 +28,18 @@ func (s *Server) authErrorResponse(w http.ResponseWriter) {
 	s.writeJSON(w, http.StatusUnauthorized, RM{"error", "request not authorized", nil})
 }
 
+func (s *Server) AddDefaultContext(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userFunc := func() map[string]interface{} {
+			user := UserFromContext(r.Context())
+			return M{"user": user}
+		}
+
+		s.Renderer.RegisterExtraContext(userFunc)
+		h.ServeHTTP(w, r)
+	})
+}
+
 func UserFromContext(ctx context.Context) *trove.User {
 	user, ok := ctx.Value(key("user")).(*trove.User)
 

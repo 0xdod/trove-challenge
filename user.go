@@ -19,10 +19,12 @@ type User struct {
 }
 
 type UserPatch struct {
-	FirstName *string `json:"first_name" mapstructure:"first_name,omitempty"`
-	LastName  *string `json:"last_name" mapstructure:"last_name,omitempty"`
-	Email     *string `json:"email" mapstructure:"email,omitempty" validate:"email"` // TODO remove and change to a secure flow
-	Password  *string `json:"password" mapstructure:"password,omitempty"`            // TODO: remove and change to reset password flow
+	FirstName       *string `json:"first_name,omitempty" mapstructure:"first_name,omitempty"`
+	LastName        *string `json:"last_name,omitempty" mapstructure:"last_name,omitempty"`
+	Email           *string `json:"email,omitempty" mapstructure:"email,omitempty" validate:"email"` // TODO remove and change to a secure flow
+	OldPassword     *string `json:"old_password,omitempty" mapstructure:"-"`
+	NewPassword     *string `json:"new_password,omitempty" mapstructure:"-,omitempty"`
+	NewPasswordHash *string `json:"-" mapstructure:"password_hash,omitempty"`
 }
 
 type FilterOption struct {
@@ -78,8 +80,10 @@ func (u *User) ApplyPatch(p UserPatch) {
 		u.Email = *p.Email
 	}
 
-	if p.Password != nil {
-		u.SetPassword(*p.Password)
+	if p.OldPassword != nil {
+		if u.VerifyPassword(*p.OldPassword) {
+			u.SetPassword(*p.NewPassword)
+		}
 	}
 }
 

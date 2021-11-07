@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
+	"log"
 	"path/filepath"
 	"strings"
 
@@ -18,6 +19,7 @@ var htmlFS embed.FS
 
 type Renderer interface {
 	Render(w io.Writer, name string, data interface{}) error
+	RegisterExtraContext(funcs ...func() map[string]interface{})
 }
 
 type tmpl struct {
@@ -25,20 +27,44 @@ type tmpl struct {
 	baseTemplates []string
 	partials      []string
 	pages         []string
+	context       map[string]interface{}
 }
 
 func (t *tmpl) Render(w io.Writer, name string, data interface{}) error {
 	//t.parseTemplates()
 	buf := &bytes.Buffer{}
-	err := t.templates[name].ExecuteTemplate(buf, "base", data)
+	var passedContext interface{}
+
+	if data == nil {
+		passedContext = t.context
+	} else if dataMap, ok := data.(map[string]interface{}); ok {
+		for k, v := range dataMap {
+			t.context[k] = v
+		}
+		passedContext = t.context
+	} else {
+		passedContext = data
+	}
+
+	err := t.templates[name].ExecuteTemplate(buf, "base", passedContext)
 
 	if err != nil {
 		fmt.Fprintf(w, "An error occured")
+		log.Println(err)
 		return err
 	}
 	_, err = buf.WriteTo(w)
 
 	return err
+}
+
+func (t *tmpl) RegisterExtraContext(funcs ...func() map[string]interface{}) {
+	for _, f := range funcs {
+		res := f()
+		for key, val := range res {
+			t.context[key] = val
+		}
+	}
 }
 
 func NewRenderer() Renderer {
@@ -47,6 +73,7 @@ func NewRenderer() Renderer {
 		pages:         make([]string, 0),
 		baseTemplates: make([]string, 0),
 		partials:      make([]string, 0),
+		context:       make(map[string]interface{}),
 	}
 
 	if err := t.parseTemplates(); err != nil {

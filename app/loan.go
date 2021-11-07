@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/0xdod/trove"
@@ -11,7 +10,7 @@ import (
 
 func (s *Server) processLoan() http.HandlerFunc {
 	type loanRequest struct {
-		Amount   float64 `json:"amount,omitempty" validate:"required"`
+		Amount   float64 `json:"amount,omitempty" validate:"required,min=10"`
 		Duration int     `json:"duration,omitempty" validate:"required,min=6,max=12"`
 	}
 
@@ -47,6 +46,9 @@ func (s *Server) processLoan() http.HandlerFunc {
 			InterestRate: 15,
 		}
 
+		newLoan.NextPaymentAmount = newLoan.ProratedPayment()
+		newLoan.DueDate = newLoan.PaymentDue()
+
 		isEligible, err := s.UserIsEligibileForLoan(user, newLoan)
 
 		if err != nil {
@@ -55,7 +57,7 @@ func (s *Server) processLoan() http.HandlerFunc {
 		}
 
 		if !isEligible {
-			s.writeJSON(w, http.StatusOK, RM{
+			s.writeJSON(w, http.StatusBadRequest, RM{
 				Status:  "fail",
 				Message: "loan request declined, you are not eligible for this amount.",
 			})
@@ -70,12 +72,7 @@ func (s *Server) processLoan() http.HandlerFunc {
 		_ = s.writeJSON(w, http.StatusOK, RM{
 			Status:  "success",
 			Message: "loan request approved",
-			Data: M{
-				"amount":             loanReq.Amount,
-				"repayment_duration": fmt.Sprintf("%d months", loanReq.Duration),
-				"next_repayment":     newLoan.PaymentDue().Format("Mon Jan 2 15:04:05 2006"),
-				"monthly_repayment":  newLoan.ProratedPayment(),
-			},
+			Data:    newLoan,
 		})
 	})
 }
