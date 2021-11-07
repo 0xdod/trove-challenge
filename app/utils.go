@@ -24,6 +24,10 @@ func (s *Server) serverErrorResponse(w http.ResponseWriter, err error) {
 	s.writeJSON(w, http.StatusInternalServerError, RM{"error", "internal error: " + err.Error(), nil})
 }
 
+func (s *Server) authErrorResponse(w http.ResponseWriter) {
+	s.writeJSON(w, http.StatusUnauthorized, RM{"error", "request not authorized", nil})
+}
+
 func UserFromContext(ctx context.Context) *trove.User {
 	user, ok := ctx.Value(key("user")).(*trove.User)
 

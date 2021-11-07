@@ -10,6 +10,7 @@ import (
 
 	"github.com/0xdod/trove"
 	"github.com/0xdod/trove/postgres"
+	"github.com/0xdod/trove/ui"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
@@ -22,6 +23,7 @@ type Server struct {
 	trove.PortfolioService
 	trove.AuthService
 	trove.LoanService
+	ui.Renderer
 }
 
 type M map[string]interface{}
@@ -67,6 +69,7 @@ func NewServer() *Server {
 		PortfolioService: postgres.NewPortfolioService(db),
 		AuthService:      postgres.NewAuthService(db),
 		LoanService:      postgres.NewLoanService(db),
+		Renderer:         ui.NewRenderer(),
 	}
 
 	s.routes()

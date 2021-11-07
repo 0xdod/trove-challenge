@@ -1,0 +1,95 @@
+{{ define "title" }} Welcome To Drove {{ end }}
+
+{{ define "styles" }}
+<style>
+    .portfolio ul, .loan ul {
+        overflow-y: auto;
+        height: 250px;
+        max-width: 70%;
+        list-style-type: none;
+    }
+    .portfolio ul li, .loan ul li {
+     padding: 10px 5px;
+     background-color: darkslateblue;
+     /* border-bottom: 1px soild darkslateblue;
+     box-shadow: 0 2px 3px rgba(0, 0 ,0 ,0.8);    */
+    }
+</style>
+{{ end }}
+
+{{ define "content" }}
+<div>
+    <ul class="nav">
+        <li><a href="/">Home</a></li> / &nbsp;
+        <li><a href="/login">Log in</a></li> / &nbsp;
+        <li><a href="/signup">Sign up</a></li>
+    </ul>
+</div>
+
+<h1> Drove </h1>
+
+<div class="portfolio">
+    <h3>Portfolio positions </h3>
+    <ul id="portfolio-list"></ul>
+</div>
+
+<div class="loan">
+    <h3>Loans</h3>
+    <ul id="loan-list"></ul>
+</div>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+    const token = localStorage.getItem('token')
+    const options = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    }
+    fetch('/api/v1/portfolio/', options).
+        then(resp => resp.json()).
+        then(({data, status, message}) => {
+            console.log(data)
+            if ( status !== 'success') {
+                console.log(message)
+                return
+            }
+           const portfolioUL = document.querySelector('#portfolio-list')
+           data.forEach(el => {
+                const li = document.createElement('li')
+                const {symbol, total_quantity, equity_value, price_per_share} =  el
+                li.innerHTML = `
+                    <p><strong>Symbol</strong>: ${symbol}<p>
+                    <p><strong>Total Quantity</strong>: ${total_quantity}<p>
+                    <p><strong>Equity Value</strong>: ${equity_value} <p>
+                    <p><strong>Price Per Share</strong>: ${ price_per_share } <p>
+                `
+                portfolioUL.appendChild(li)
+           })
+
+        fetch('/api/v1/loans', options).
+            then(resp => resp.json()).
+            then(({data, status, message}) => {
+                console.log(data)
+                if ( status !== 'success') {
+                    console.log(message)
+                    return
+                }
+            const loansUL = document.querySelector('#loan-list')
+            data.forEach(el => {
+                    const li = document.createElement('li')
+                    const { amount, duration, paid_back } = el
+                    li.innerHTML = `
+                        <p><strong>Loan Amount</strong>: ${amount}<p>
+                        <p><strong>Loan Duration</strong>: ${duration} months <p>
+                        <p><strong>Outstanding</strong>: ${amount - paid_back} <p>
+                    `
+                    loansUL.appendChild(li)
+            })
+        })
+    })
+</script>
+{{ end }}

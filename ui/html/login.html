@@ -1,0 +1,50 @@
+{{ define "title" }} Login {{ end }}
+
+{{ define "content" }}
+<form id="form">
+    <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email">
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password">
+    </div>
+
+    <button>Log in</button>
+</form>
+{{ end }}
+
+
+{{ define "scripts" }}
+<script>
+    const form = document.querySelector("#form")
+    form.addEventListener('submit', ($evt) => {
+        $evt.preventDefault()
+        var email = document.getElementsByName('email').item(0).value
+        var password = document.getElementsByName('password').item(0).value
+        const options = {
+            method: 'POST',
+            body: JSON.stringify({
+                email,
+                password
+            }),
+            headers: {},
+        }
+        fetch('/api/v1/auth/token', options).
+           then(resp => resp.json()).
+           then(({data, message, status}) => {
+               if (status !== 'success') {
+                   alert('an error occurred')
+                   return
+               }
+               const {token, expiry} = data.token 
+               localStorage.setItem('token', token)
+               location.href = '/'
+           }).
+           catch(console.log)
+    })
+    
+</script>
+{{ end }}

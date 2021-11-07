@@ -1,0 +1,28 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }} Drove {{ end }}</title>
+    {{ block "global_styles" . }} 
+     <style>
+         .nav {
+             display: flex;
+             list-style-type: none;
+         }
+     </style>
+    {{ end }}
+    {{ block "styles" .}} {{ end }}
+</head>
+
+{{ block "body" .}}
+<body>
+{{ block "content" .}} {{ end }}
+
+{{ block "scripts" .}} {{ end }}
+</body>
+{{ end }}
+</html>
+{{ end }}
