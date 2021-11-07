@@ -1,4 +1,4 @@
-{{ define "title" }} Welcome To Drove {{ end }}
+{{ define "title" }} Welcome To Loanstackwave {{ end }}
 
 {{ define "styles" }}
 <style>
@@ -8,7 +8,6 @@
     }
     .portfolio ul li, .loans ul li {
      padding: 10px 5px;
-     border-bottom: 1px soild darkslateblue;
      box-shadow: 0 2px 3px rgba(0, 0 ,0 ,0.8);
     }
 
@@ -19,19 +18,29 @@
 
     th {
         border: 1px solid silver;
+        background-color:lightgreen;
     }
     td, th {
         padding: 5px 15px;
-        border-right: 1px solid silver;  
+        border: 1px solid silver; 
+    }
+    td {
+        background-color: lightgoldenrodyellow;
     }
 </style>
 {{ end }}
 
 {{ define "content" }}
-<h1> Drove </h1>
+<h1 class="mb-3"> Loanstackwave </h1>
+<hr>
 
 <div class="portfolio mb-4">
-    <h3>Portfolio positions </h3>
+    <div class="d-flex justify-content-between align-items-center w-50">
+        <h4>Portfolio positions </h4>
+        <h6 class="font-weight-italics">Total Value: $ <span id="ptf_value"></span></h6>
+    </div>
+   
+
     <table id="portfolio">
         <tr>
             <th>Symbol</th>
@@ -43,7 +52,18 @@
 </div>
 
 <div class="loans mb-4">
-    <h3 class="mb-2">Loans</h3>
+    <h4 class="mb-2">Loans</h4>
+    <div id="loans-container" class="mb-4">
+        <table id="loans">
+            <tr>
+                <th>Amount ($)</th>
+                <th>Duration</th>
+                <th>Next Installment ($)</th>
+                <th>Due Date</th>
+                <th>Outstanding ($)</th>
+            </tr>
+        </table>
+    </div>
     <div class="mb-4">
         <h6>Apply for fresh loans.</h6>
         <form id="loan-form" class="w-50">
@@ -67,67 +87,58 @@
             <button class="btn btn-success">Apply for new loan</button>
         </form>
     </div>
-    <div id="loans-container">
-        <table id="loans">
-            <tr>
-                <th>Amount ($)</th>
-                <th>Duration</th>
-                <th>Next Installment ($)</th>
-                <th>Due Date</th>
-                <th>Outstanding ($)</th>
-            </tr>
-        </table>
-    </div>
 </div>
 {{ end }}
 
 {{ define "scripts" }}
 <script>
-    $.ajaxSetup({
-       beforeSend: function(request) {
-           request.setRequestHeader('Authorization', `Bearer ${TOKEN}`)
-       },
-   })
-</script>
-<script>
-    const token = localStorage.getItem('token')
-    const options = {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
+    function addLoansToPage(data) {
+        const { amount, duration, due_date, next_payment_amount, paid_back } = data
+        const $tr = $(`
+            <tr>
+                <td>${amount}</td>
+                <td>${duration} months</td>
+                <td>${next_payment_amount.toFixed(2)}</td>
+                <td>${new Date(due_date).toDateString()}</td>
+                <td>${amount - paid_back}</td>
+                <td><button class="btn btn-secondary btn-sm">Pay back</button></td>
+            </tr>`)
+            $(('#loans')).append($tr)
     }
-    fetch('/api/v1/portfolio/', options).
-        then(resp => resp.json()).
-        then(({data, status, message}) => {
+
+    $.get('/api/v1/portfolio/').
+        done(({data, status, message}) => {
             console.log(data)
             if ( status !== 'success') {
                 console.log(message)
                 return
             }
-           const portfolioTbl = document.querySelector('#portfolio')
+           const $portfolioTbl = $('#portfolio')
            data.forEach(el => {
-                const tr = document.createElement('tr')
                 const {symbol, total_quantity, equity_value, price_per_share} =  el
-                tr.innerHTML = `
-                    <td>${symbol}</td>
-                    <td>${total_quantity}</td>
-                    <td>${equity_value}</td>
-                    <td>${ price_per_share }</td>
-                `
-                portfolioTbl.appendChild(tr)
+                const $tr = $(`
+                    <tr>
+                        <td>${symbol}</td>
+                        <td>${total_quantity}</td>
+                        <td>${equity_value}</td>
+                        <td>${ price_per_share }</td>
+                    </tr>
+                `)
+                $portfolioTbl.append($tr)
            })
 
-        fetch('/api/v1/loans', options).
-            then(resp => resp.json()).
-            then(({data, status, message}) => {
+        $.get('/api/v1/portfolio/value').done(({data})=> {
+           $('#ptf_value').text(data.portfolio_value)
+        }).fail(console.log)
+
+        $.get('/api/v1/loans').
+            done(({data, status, message}) => {
                 console.log(data)
                 if ( status !== 'success') {
                     console.log(message)
                     return
                 }
-            const loansTbl = document.querySelector('#loans')
+            const $loansTbl = $('#loans')
             
             if (data.length < 1) {
                 const $el = $('#loans-container')
@@ -137,19 +148,8 @@
                 return
             }
 
-            data.forEach(el => {
-                    const tr = document.createElement('tr')
-                    const { amount, duration, due_date, next_payment_amount, paid_back } = el
-                    tr.innerHTML = `
-                        <td>${amount}</td>
-                        <td>${duration} months</td>
-                        <td>${next_payment_amount}</td>
-                        <td>${new Date(due_date)}</td>
-                        <td>${amount - paid_back}</td>
-                    `
-                    loansTbl.appendChild(tr)
-            })
-        })
+            data.forEach(addLoansToPage)
+        }).fail(console.log)
 
         $('#loan-form').on('submit', ($evt) => {
             $evt.preventDefault()
@@ -159,18 +159,12 @@
                 amount: parseFloat($('[name="amount"]').val()),
                 duration: parseInt($('[name="duration"]').val()),
             })).done(({data, status})=> {
+                addLoansToPage(data)
                 console.log(data)
-                const { amount, duration, due_date, next_payment_amount, paid_back } = data
-                const $tr = $(`<tr>
-                        <td>${amount}</td>
-                        <td>${duration} months</td>
-                        <td>${next_payment_amount}</td>
-                        <td>${new Date(due_date)}</td>
-                        <td>${amount - paid_back}</td>
-                    </tr>`)
-                    $(('#loans')).append($tr)
-                console.log(data)
-            }).fail(console.log)
+            }).fail(error => {
+                alert(error.responseJSON.message)
+                console.log(error)
+            })
         })
     })
 </script>

@@ -1,0 +1,211 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "Trove",
+    "dateExported": "2021-11-07T18:39:40.591Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "containerId": "",
+            "sortNum": 10000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Create user",
+            "url": "localhost:8000/api/v1/users",
+            "method": "POST",
+            "modified": "2021-11-07T18:37:48.860Z",
+            "created": "2021-10-31T09:44:28.000Z",
+            "_id": "9c21442e-f583-4fb2-a442-826100cf1acd",
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"first_name\":\"jailer\",\n    \"last_name\":\"asa\",\n    \"email\":\"asa@jailer.com\",\n    \"password\": \"who goes there\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 20000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Update user",
+            "url": "localhost:8000/api/v1/users/1",
+            "method": "PATCH",
+            "modified": "2021-11-07T18:37:56.215Z",
+            "created": "2021-10-31T09:48:04.003Z",
+            "_id": "f4a5d37f-946e-4e83-86eb-d8c23820c867",
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"first_name\": \"meta verses\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 30000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Pull portfolio",
+            "url": "localhost:8000/users/1/portfolio",
+            "method": "GET",
+            "modified": "2021-11-03T20:24:24.328Z",
+            "created": "2021-10-31T12:20:17.993Z",
+            "_id": "9882b804-5b12-4f10-8a80-00a5b2b2cec4",
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "KL67YBZBQJSU6FR7L4HZUYQ5OI"
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 40000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Get portfolio value",
+            "url": "localhost:8000/api/v1/portfolio/value",
+            "method": "GET",
+            "modified": "2021-11-07T18:38:28.537Z",
+            "created": "2021-10-31T13:07:06.658Z",
+            "_id": "fa5ddc77-9c91-4b89-97d9-14b3d4222798",
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "KL67YBZBQJSU6FR7L4HZUYQ5OI"
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 50000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Request loan",
+            "url": "localhost:8000/api/v1/loans",
+            "method": "POST",
+            "modified": "2021-11-07T18:38:38.388Z",
+            "created": "2021-11-01T12:03:45.647Z",
+            "_id": "00a530c9-573a-47ab-b030-13c2ccb6a47b",
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"amount\": 2000,\n    \"duration\": 7\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "KL67YBZBQJSU6FR7L4HZUYQ5OI"
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 55000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "view loans",
+            "url": "localhost:8000/api/v1/loans",
+            "method": "GET",
+            "modified": "2021-11-03T21:47:34.213Z",
+            "created": "2021-11-03T21:27:54.722Z",
+            "_id": "f11e5046-2cb1-448b-ba97-500d6662668c",
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"amount\": 2000,\n    \"duration\": 7\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "KL67YBZBQJSU6FR7L4HZUYQ5OI"
+            },
+            "tests": []
+        },
+        {
+            "containerId": "",
+            "sortNum": 60000,
+            "headers": [
+                {
+                    "name": "Accept",
+                    "value": "*/*"
+                },
+                {
+                    "name": "User-Agent",
+                    "value": "Thunder Client (https://www.thunderclient.io)"
+                }
+            ],
+            "colId": "2194b735-f73b-4c56-84a9-ebdacdc56c1c",
+            "name": "Get auth token",
+            "url": "localhost:8000/api/v1/auth/token",
+            "method": "POST",
+            "modified": "2021-11-07T18:38:47.336Z",
+            "created": "2021-11-03T20:15:26.451Z",
+            "_id": "380ad5d2-f4d4-4159-a0c0-5dd9cdcedd24",
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"email\": \"asa@jailer.com\",\n    \"password\": \"who goes there\"\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}

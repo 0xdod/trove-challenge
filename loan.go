@@ -9,11 +9,11 @@ import (
 type Loan struct {
 	ID                int       `json:"id,omitempty" gorm:"primaryKey"`
 	Amount            float64   `json:"amount,omitempty"`
-	PaidBack          float64   `json:"paid_back,omitempty"`
+	PaidBack          float64   `json:"paid_back"`
 	InterestRate      float64   `json:"interest_rate,omitempty"`
-	UserID            int       `json:"-,omitempty"`
-	User              User      `json:"-,omitempty"`
-	InstallmentNumber int       `json:"-,omitempty"`
+	UserID            int       `json:"-"`
+	User              User      `json:"-"`
+	InstallmentNumber int       `json:"-"`
 	Duration          int       `json:"duration,omitempty"`
 	NextPaymentAmount float64   `json:"next_payment_amount,omitempty"`
 	DueDate           time.Time `json:"due_date,omitempty"`
@@ -25,8 +25,7 @@ func (l *Loan) PaymentDue() time.Time {
 	if l.PaymentComplete() {
 		return time.Time{}
 	}
-	l.InstallmentNumber++
-	return l.CreatedAt.AddDate(0, l.InstallmentNumber, 0)
+	return time.Now().AddDate(0, l.InstallmentNumber+1, 0)
 }
 
 func (l *Loan) PaymentComplete() bool {

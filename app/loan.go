@@ -119,5 +119,5 @@ func (s *Server) UserIsEligibileForLoan(user *trove.User, loan *trove.Loan) (boo
 	loanLimit := (60.0 / 100.0) * val
 
 	// total loan balance up to 60% of portfolio value?
-	return loanLimit > totalLoanBal, nil
+	return loanLimit > totalLoanBal+loan.Amount, nil
 }

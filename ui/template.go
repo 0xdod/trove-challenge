@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -28,10 +29,11 @@ type tmpl struct {
 	partials      []string
 	pages         []string
 	context       map[string]interface{}
+	template.FuncMap
 }
 
 func (t *tmpl) Render(w io.Writer, name string, data interface{}) error {
-	//t.parseTemplates()
+	// t.parseTemplates()
 	buf := &bytes.Buffer{}
 	var passedContext interface{}
 
@@ -74,6 +76,9 @@ func NewRenderer() Renderer {
 		baseTemplates: make([]string, 0),
 		partials:      make([]string, 0),
 		context:       make(map[string]interface{}),
+		FuncMap: template.FuncMap{
+			"isProd": isProd,
+		},
 	}
 
 	if err := t.parseTemplates(); err != nil {
@@ -91,7 +96,11 @@ func (t *tmpl) parseTemplates() error {
 	for _, page := range t.pages {
 		name := filepath.Base(page)
 		files := t.addBaseTemplatesAndPartialsToPages(page)
-		temp := template.Must(template.ParseFS(htmlFS, files...))
+		temp := &template.Template{}
+		temp = temp.Funcs(t.FuncMap)
+		temp = template.Must(temp.ParseFS(htmlFS, files...))
+
+		//temp := template.Must(template.ParseFiles(files...)) // UNCOMMENT WHEN USING YOUR ACTUAL FILESYSTEM
 
 		t.templates[name] = temp
 	}
@@ -107,8 +116,35 @@ func (t *tmpl) addBaseTemplatesAndPartialsToPages(page string) []string {
 	return files
 }
 
+func readDir(dir string) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, de := range entries {
+		name := fmt.Sprintf("%s/%s", dir, de.Name())
+		if !de.IsDir() {
+			files = append(files, name)
+		} else {
+			fs, err := readDir(name)
+
+			if err != nil {
+				return nil, err
+			}
+
+			files = append(files, fs...)
+		}
+	}
+	return files, nil
+}
+
 func (t *tmpl) extractPages(fsys fs.FS) error {
 	matches, err := fsx.Glob(fsys, "html/**/*.html")
+
+	//matches, err := readDir("./ui/html")
 
 	if err != nil {
 		return err
@@ -131,4 +167,8 @@ func (t *tmpl) extractPages(fsys fs.FS) error {
 	}
 
 	return nil
+}
+
+func isProd() bool {
+	return os.Getenv("RELEASE") == "production"
 }
