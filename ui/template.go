@@ -96,9 +96,7 @@ func (t *tmpl) parseTemplates() error {
 	for _, page := range t.pages {
 		name := filepath.Base(page)
 		files := t.addBaseTemplatesAndPartialsToPages(page)
-		temp := &template.Template{}
-		temp = temp.Funcs(t.FuncMap)
-		temp = template.Must(temp.ParseFS(htmlFS, files...))
+		temp := template.Must(template.New("base").Funcs(t.FuncMap).ParseFS(htmlFS, files...))
 
 		//temp := template.Must(template.ParseFiles(files...)) // UNCOMMENT WHEN USING YOUR ACTUAL FILESYSTEM
 
