@@ -121,3 +121,8 @@ func (s *Server) UserIsEligibileForLoan(user *trove.User, loan *trove.Loan) (boo
 	// total loan balance up to 60% of portfolio value?
 	return loanLimit > totalLoanBal+loan.Amount, nil
 }
+
+func (s *Server) repayLoan() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	})
+}

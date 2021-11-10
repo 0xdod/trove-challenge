@@ -7,3 +7,6 @@ build:
 dev:
 	gow run cmd/trove/main.go
 
+test:
+	go test ./...
+

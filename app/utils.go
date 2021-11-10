@@ -7,14 +7,14 @@ import (
 	"github.com/0xdod/trove"
 )
 
-func (s *Server) dummyHandlerFunc(w http.ResponseWriter, r *http.Request) {
+// func (s *Server) dummyHandlerFunc(w http.ResponseWriter, r *http.Request) {
 
-}
+// }
 
-func (s *Server) coolHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	})
-}
+// func (s *Server) coolHandler() http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 	})
+// }
 
 func (s *Server) badRequestResponse(w http.ResponseWriter, err error) {
 	s.writeJSON(w, http.StatusUnprocessableEntity, RM{"error", "request error: " + err.Error(), nil})
